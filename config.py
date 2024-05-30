@@ -1,9 +1,15 @@
 from fastapi import FastAPI
 from auth import auth_router
 from pydantic import BaseModel
+from category import category_router
+from product import product_router
+from orders import orders_router
 
 app = FastAPI()
 app.include_router(auth_router)
+app.include_router(category_router)
+app.include_router(product_router)
+app.include_router(orders_router)
 
 
 @app.get("/")

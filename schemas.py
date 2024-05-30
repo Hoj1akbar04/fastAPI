@@ -30,3 +30,22 @@ class Registration(BaseModel):
 class Login(BaseModel):
     username: str
     password: str
+
+
+class CategoryM(BaseModel):
+    id: Optional[int]
+    name: str
+
+
+class ProductM(BaseModel):
+    id: Optional[int]
+    name: str
+    description: str
+    price: float
+    category_id: Optional[int]
+
+
+class OrderM(BaseModel):
+    id: Optional[int]
+    user_id: int
+    product_id: int

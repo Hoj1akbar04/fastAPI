@@ -1,7 +1,6 @@
 from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Boolean, Float
 from sqlalchemy.orm import relationship
 from database import Base
-from datetime import datetime
 
 
 class User(Base):
@@ -17,7 +16,6 @@ class User(Base):
     is_staff = Column(Boolean, default=False)
     orders = relationship("Order", back_populates="users")
 
-
     def __repr__(self):
         return self.username
 
@@ -28,7 +26,6 @@ class Category(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(30), nullable=True)
     products = relationship("Product", back_populates="categories")
-
 
     def __repr__(self):
         return self.name
