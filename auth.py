@@ -28,7 +28,6 @@ async def login(user: Login):
     return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Invalid username or password")
 
 
-
 @auth_router.get("/register")
 async def register():
     return {
@@ -59,16 +58,11 @@ async def register(user: Registration):
     return HTTPException(status_code=status.HTTP_201_CREATED, detail="Successfully registered")
 
 
-
-
-
-
 @auth_router.get("/logout")
 async def get_logout():
     return {
         "message": "Logout Page"
     }
-
 
 
 @auth_router.post("/logout")

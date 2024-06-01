@@ -50,9 +50,9 @@ async def create_order(order: OrderM):
     return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User_id or product_id already exists")
 
 
-@orders_router.put("/update/{order_id}", status_code=status.HTTP_200_OK)
-async def update_order(order_id: int, updated_order: OrderM):
-    order = session.query(Order).filter(Order.id == order_id).first()
+@orders_router.put("/{id}", status_code=status.HTTP_200_OK)
+async def update_order(id: int, updated_order: OrderM):
+    order = session.query(Order).filter(Order.id == id).first()
     if not order:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
 
@@ -77,9 +77,9 @@ async def update_order(order_id: int, updated_order: OrderM):
     return jsonable_encoder(context)
 
 
-@orders_router.delete("/delete/{order_id}", status_code=status.HTTP_200_OK)
-async def delete_order(order_id: int):
-    order = session.query(Order).filter(Order.id == order_id).first()
+@orders_router.delete("/{id}", status_code=status.HTTP_200_OK)
+async def delete_order(id: int):
+    order = session.query(Order).filter(Order.id == id).first()
     if not order:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
 
@@ -91,3 +91,17 @@ async def delete_order(order_id: int):
         "msg": "Order deleted"
     }
     return jsonable_encoder(context)
+
+
+@orders_router.get("/{id}", status_code=status.HTTP_200_OK)
+def get_orders(id: int):
+    check_order = session.query(Order).filter(Order.id == id).first()
+    if check_order:
+        context = {
+            "id": check_order.id,
+            "user_id": check_order.user_id,
+            "product_id": check_order.product_id
+        }
+        return jsonable_encoder(context)
+
+    return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Category not found")
