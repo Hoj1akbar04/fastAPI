@@ -9,7 +9,7 @@ category_router = APIRouter(prefix="/categories")
 
 
 @category_router.get("/")
-def get_categories():
+async def get_categories():
     categories = session.query(Category).all()
     context = [
         {

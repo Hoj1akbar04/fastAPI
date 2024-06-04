@@ -43,9 +43,19 @@ class ProductM(BaseModel):
     description: str
     price: float
     category_id: Optional[int]
+    count: int
 
 
 class OrderM(BaseModel):
     id: Optional[int]
     user_id: int
     product_id: int
+    order_status: str
+    count: int
+
+
+class OrderUserM(BaseModel):
+    username: str
+
+
+

@@ -17,7 +17,11 @@ def get_products():
             "name": product.name,
             "description": product.description,
             "price": product.price,
-            "category_id": product.category_id,
+            "category": {
+                    "id": product.categories.id,
+                    "name": product.categories.name
+                },
+            "count": product.count
         }
         for product in products
     ]
@@ -38,23 +42,30 @@ def create_product(product: ProductM):
             name=product.name,
             description=product.description,
             price=product.price,
-            category_id=product.category_id
+            category_id=product.category_id,
+            count=product.count
         )
 
         session.add(new_product)
         session.commit()
-        context = {
-            "status_code": 201,
-            "msg": "product created",
-            "data": {
-                "id": product.id,
-                "name": product.name,
-                "description": product.description,
-                "price": product.price,
-                "category_id": product.category_id,
+        context = [
+            {
+                "status_code": 201,
+                "msg": "product created",
+                "data": {
+                    "id": new_product.id,
+                    "name": new_product.name,
+                    "description": new_product.description,
+                    "price": new_product.price,
+                    "category": {
+                        "id": new_product.categories.id,
+                        "name": new_product.categories.name
+                    },
+                    "count": new_product.count
+                }
             }
-        }
-        return context
+        ]
+        return jsonable_encoder(context)
     return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="category_id already exists")
 
 
@@ -68,7 +79,11 @@ async def get_product(id: int):
                 "name": check_product.name,
                 "description": check_product.description,
                 "price": check_product.price,
-                "category_id": check_product.category_id,
+                "category": {
+                    "id": check_product.category.id,
+                    "name": check_product.category.name
+                },
+                "count": check_product.count
             }
         ]
         return jsonable_encoder(context)

@@ -1,5 +1,5 @@
 from models import Order, Product, User
-from schemas import OrderM
+from schemas import OrderM, OrderUserM
 from fastapi import APIRouter, HTTPException, status
 from fastapi.encoders import jsonable_encoder
 from database import session, ENGINE
@@ -14,9 +14,28 @@ async def get_orders():
     context = [
         {
             "id": order.id,
-            "user_id": order.user_id,
-            "product_id": order.product.id,
-
+            "user": {
+                "id": order.users.id,
+                "first_name": order.users.first_name,
+                "last_name": order.users.last_name,
+                "email": order.users.email,
+                "username": order.users.username,
+                "is_active": order.users.is_active,
+                "is_staff": order.users.is_staff
+            },
+            "product": {
+                "id": order.products.id,
+                "name": order.products.name,
+                "description": order.products.description,
+                "price": order.products.price,
+                "category": {
+                    "id": order.products.categories.id,
+                    "name": order.products.categories.name
+                },
+                "count": order.products.count
+            },
+            "order_status": order.order_status,
+            "count": order.count
         }
         for order in orders
     ]
@@ -26,9 +45,9 @@ async def get_orders():
 
 @orders_router.post("/create")
 async def create_order(order: OrderM):
-    check_user = session.query(User).filter_by(User.id == order.user_id).first()
-    check_product = session.query(Product).filter_by(Product.id == order.product.id).first()
-    check_order = session.query(Order).filter_by(Order.id == order.id).first()
+    check_user = session.query(User).filter(User.id == order.user_id).first()
+    check_product = session.query(Product).filter(Product.id == order.product_id).first()
+    check_order = session.query(Order).filter(Order.id == order.id).first()
 
     if check_order:
         return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Order already exists")
@@ -37,15 +56,44 @@ async def create_order(order: OrderM):
         new_order = Order(
             id=order.id,
             user_id=order.user_id,
-            product_id=order.product.id
+            product_id=order.product_id,
+            count=order.count,
+            order_status=order.order_status
         )
 
         session.add(new_order)
         session.commit()
-        context = {
-            "status_code": 201,
-            "msg": "order created"
-        }
+        context = [
+            {
+                "status_code": 201,
+                "msg": "order created",
+                "data": {
+                    "id": new_order.id,
+                    "user": {
+                        "id": new_order.users.id,
+                        "first_name": new_order.users.first_name,
+                        "last_name": new_order.users.last_name,
+                        "email": new_order.users.email,
+                        "username": new_order.users.username,
+                        "is_active": new_order.users.is_active,
+                        "is_staff": new_order.users.is_staff
+                    },
+                    "product": {
+                        "id": new_order.products.id,
+                        "name": new_order.products.name,
+                        "description": new_order.products.description,
+                        "price": new_order.products.price,
+                        "category": {
+                            "id": new_order.product.category.id,
+                            "name": new_order.product.category.name
+                        },
+                        "count": new_order.products.count
+                    },
+                    "order_status": new_order.order_status,
+                    "count": new_order.count
+                }
+            }
+        ]
         return jsonable_encoder(context)
     return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User_id or product_id already exists")
 
@@ -98,10 +146,106 @@ def get_orders(id: int):
     check_order = session.query(Order).filter(Order.id == id).first()
     if check_order:
         context = {
-            "id": check_order.id,
-            "user_id": check_order.user_id,
-            "product_id": check_order.product_id
+            "status_code": 201,
+            "msg": "order created",
+            "data": {
+                "id": check_order.id,
+                "user": {
+                    "id": check_order.users.id,
+                    "first_name": check_order.users.first_name,
+                    "last_name": check_order.users.last_name,
+                    "email": check_order.users.email,
+                    "username": check_order.users.username,
+                    "is_active": check_order.users.is_active,
+                    "is_staff": check_order.users.is_staff
+                },
+                "product": {
+                    "id": check_order.product.id,
+                    "name": check_order.product.name,
+                    "description": check_order.product.description,
+                    "price": check_order.product.price,
+                    "category": {
+                        "id": check_order.product.category.id,
+                        "name": check_order.product.category.name
+                    },
+                    "count": check_order.product.count
+                },
+                "order_status": check_order.order_status,
+                "count": check_order.count,
+                "total_b": check_order.product.price * check_order.count,
+                "total_b_promokod": check_order.product.price * check_order
+            }
         }
-        return jsonable_encoder(context)
+        promokod = "phone"
+        if promokod == "phone":
+            context["data"]["total_b_promokod"] *= 0.8
+            return jsonable_encoder(context)
 
-    return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Category not found")
+        else:
+            return jsonable_encoder(context)
+
+    return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
+
+
+@orders_router.post("/user/order")
+async def get_order_user(order_user: OrderUserM):
+    check_user = session.query(User).filter(User.username == order_user.username).first()
+    if check_user and check_user.is_staff == True:
+        check_order = session.query(Order).filter(Order.user_id == check_user.id)
+        if check_order:
+            context = [
+                {
+                    "id": order.id,
+                    "user": {
+                        "id": order.users.id,
+                        "first_name": order.users.first_name,
+                        "last_name": order.users.last_name,
+                        "email": order.users.email,
+                        "username": order.users.username,
+                        "is_active": order.users.is_active,
+                        "is_staff": order.users.is_staff
+                    },
+                    "product": {
+                        "id": order.products.id,
+                        "name": order.products.name,
+                        "description": order.products.description,
+                        "price": order.products.price,
+                        "category": {
+                            "id": order.products.categories.id,
+                            "name": order.products.categories.name
+                        },
+                        "count": order.products.count
+                    },
+                    "order_status": order.order_status,
+                    "count": order.count
+                }
+                for order in check_order
+            ]
+            return jsonable_encoder(context)
+        return HTTPException(status_code=status.HTTP_200_OK, detail="This user has no orders")
+    return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found this user")
+
+
+@orders_router.post("/user/order/price")
+async def user_order_price(order_user: OrderUserM):
+    check_user = session.query(User).filter(User.username == order_user.username).first()
+    if check_user:
+        check_order = session.query(Order).filter(Order.user_id == check_user.id)
+        if check_order:
+            total_price = 0
+            product_count = 0
+            for order in check_order:
+                total_price += order.count * order.products.price
+
+            data = {
+                "status code": 200,
+                "msg": "The total price",
+                "data": {
+                    "total_price": total_price,
+                    "product_count": product_count
+                }
+            }
+            return jsonable_encoder(data)
+
+
+

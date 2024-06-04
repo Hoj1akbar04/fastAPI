@@ -1,5 +1,7 @@
 from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Boolean, Float
 from sqlalchemy.orm import relationship
+from sqlalchemy_utils.types.choice import ChoiceType
+
 from database import Base
 
 
@@ -39,6 +41,7 @@ class Product(Base):
     description = Column(Text, nullable=False)
     price = Column(Float, nullable=False)
     category_id = Column(Integer, ForeignKey('categories.id'))
+    count = Column(Integer, nullable=False)
     categories = relationship('Category', back_populates='products')
     orders = relationship("Order", back_populates="products")
 
@@ -48,12 +51,18 @@ class Product(Base):
 
 class Order(Base):
     __tablename__ = 'orders'
-
+    OrderChoices = (
+        ("PANDING", "panding"),
+        ("TRANSIT", "transit"),
+        ("DELIVERED", "delivered")
+    )
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('users.id'))
     users = relationship('User', back_populates="orders")
     product_id = Column(Integer, ForeignKey('products.id'))
     products = relationship('Product', back_populates="orders")
+    order_status = Column(ChoiceType(choices=OrderChoices), default="Pending")
+    count = Column(Integer, nullable=False)
 
 
 
