@@ -4,6 +4,14 @@ from pydantic import BaseModel
 from category import category_router
 from product import product_router
 from orders import orders_router
+from fastapi_jwt_auth import AuthJWT
+from schemas import JwtModel
+
+
+@AuthJWT.load_config
+def config():
+    return JwtModel()
+
 
 app = FastAPI()
 app.include_router(auth_router)

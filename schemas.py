@@ -2,6 +2,12 @@ from pydantic import BaseModel
 from typing import Optional
 
 
+class JwtModel(BaseModel):
+    authjwt_secret_key: str = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzb21lIjoicGF5bG9hZCJ9.4twFt5NiznN84AWoo1d7KO1T_yoc0Z6XOpOVswacPZg'
+    authjwt_algorithm: str = "HS256"
+    authjwt_access_token_expires: int = 3600
+
+
 class Registration(BaseModel):
     id: Optional[int]
     first_name: str
